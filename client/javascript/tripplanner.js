@@ -13,13 +13,25 @@ function Tripplanner(days, map, perm, attractions){
 }
 
 Tripplanner.prototype.addDay = function(){
-    this.days.push(
-        {
-          Hotels: [],
-          Restaurants: [],
-          Activities: []
-        }
-    );
+    var newDay = {
+      number: this.days.length + 1
+    }
+
+    $.ajax({
+      method: "POST",
+      url: "/api/days",
+      data: newDay, 
+      success: function(responseData){
+        var parsedResponse = convert(responseData);
+        console.log("RESPONSE DATA:", parsedResponse);
+        console.log("RESPONSE THIS", this);
+        this.days.push(parsedResponse);
+      }.bind(this),
+      error: function(errorObj){
+        console.error(errorObj);
+      }
+    })
+
     return this.days.length - 1;
 };
 
@@ -62,8 +74,22 @@ Tripplanner.prototype.init = function(){
   });
 
   $('#dayRemover').click(function(){
-    that.days.splice(that.currentIdx, 1);
-    that.renderDayPicker(that.days.length > 0 ? 0: null);
+    
+    console.log("REMOVER INDEX", that.currentIdx);
+
+    $.ajax({
+      method: "DELETE",
+      url: "/api/days/" + that.days[that.currentIdx]._id, 
+      success: function(responseData){
+        console.log("REMOVAL RESPONSE DATA:", responseData);
+        that.days.splice(that.currentIdx, 1);
+        that.renderDayPicker(that.days.length > 0 ? 0: null);
+      }.bind(this),
+      error: function(errorObj){
+        console.error(errorObj);
+      }
+    })
+
   });
 };
 
@@ -161,16 +187,10 @@ Tripplanner.prototype.renderDay = function(){
       return;
 
     var day = this.days[this.currentIdx];
-    console.log("this.cIdx", this.currentIdx);
-    console.log("day", day);
-    console.log("t.days", this.days)
     this.categoryIterator(function(category){
-      console.log(day[category])
       var ids = day[category];
       ids.forEach(function(id){
         var item = this.findItemByIdAndCategory(id, category);
-        console.log("ID", id, "CAT", category);
-        console.log("ITEM", item);
         this.renderItem(item);
       }, this);
     });

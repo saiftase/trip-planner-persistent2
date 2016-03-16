@@ -30,13 +30,9 @@
   var Days = {{days | json }};
   
   var days = Days.map(function(day){
-    var obj = {
-      Hotels: [day.hotel],
-      Restaurants: day.restaurants,
-      Activities: day.activities
-    };
-    console.log("Object", obj);
-    return obj;
+    dayRender = convert(day)
+    console.log("Swig: Obj", dayRender);
+    return dayRender;
   });
 
   var attractions = {
@@ -44,6 +40,23 @@
     Restaurants: Restaurants,
     Activities: Activities
   }
+
+  function convert(dayDB){
+    var hotels = [];
+    if(dayDB.hotel){
+      hotels.push(dayDB.hotel);
+    }
+
+    var obj = {
+      _id: dayDB._id,
+      Hotels: hotels,
+      Restaurants: dayDB.restaurants,
+      Activities: dayDB.activities
+    };
+
+    return obj;
+  }
+
   {% endautoescape %}
   </script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAkarjA8hlysMC5aK7ywsrUwYY6UwpnXG0&sensor=true"></script>
